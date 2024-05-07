@@ -1,23 +1,23 @@
 import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Post } from './post.entity';
+import { Comment } from '../comments/comment.entity';
 
 @Injectable()
-export class OwnerGuard implements CanActivate {
+export class CommentOwnerGuard implements CanActivate {
   constructor(
-    @InjectRepository(Post)
-    private postsRepository: Repository<Post>,
+    @InjectRepository(Comment)
+    private commentsRepository: Repository<Comment>,
   ) {}
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
     const requestUserId = request.user.id;
     const requestParam = request.params.id;
-    const post = await this.postsRepository.findOne({
+    const comment = await this.commentsRepository.findOne({
       where: { id: requestParam },
     });
-    console.log(post.userId, requestUserId);
+    console.log(comment.userId, requestUserId);
 
-    return post.userId === requestUserId;
+    return comment.userId === requestUserId;
   }
 }

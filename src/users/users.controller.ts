@@ -1,7 +1,14 @@
-import { Body, Controller, Post, ValidationPipe } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Patch,
+  Post,
+  Request,
+  ValidationPipe,
+} from '@nestjs/common';
 import { UsersService } from './users.service';
 import { ApiTags } from '@nestjs/swagger';
-import { CreateUserDto } from './user.dto';
+import { CreateUserDto, UpdateUserDto, UserResponseDto } from './user.dto';
 import { Public } from 'src/decorators/public.decorator';
 import { User } from './user.entity';
 
@@ -14,7 +21,16 @@ export class UsersController {
   @Post('/register')
   createUser(
     @Body(new ValidationPipe()) createUserDto: CreateUserDto,
-  ): Promise<User> {
+  ): Promise<UserResponseDto> {
     return this.usersService.createUser(createUserDto);
+  }
+
+  @Patch('/update')
+  updateUser(
+    @Body(new ValidationPipe()) updateUserDto: UpdateUserDto,
+    @Request() req,
+  ): Promise<UserResponseDto> {
+    const { id: userId } = req.user;
+    return this.usersService.updateUser(updateUserDto, userId);
   }
 }

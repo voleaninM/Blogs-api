@@ -5,25 +5,25 @@ import { Repository } from 'typeorm';
 import { CreatePostDto, FilterOptionsDto, UpdatePostDto } from './post.dto';
 import { Tag } from 'src/tags/tag.entity';
 import { In } from 'typeorm';
+import { capitalizeName } from 'src/utils';
+import { TagsService } from 'src/tags/tags.service';
 
 @Injectable()
 export class PostsService {
   constructor(
+    private tagService: TagsService,
     @InjectRepository(Post)
     private postsRepository: Repository<Post>,
-    @InjectRepository(Tag)
-    private tagsRepository: Repository<Tag>,
   ) {}
 
   async getAll(query: FilterOptionsDto): Promise<Post[]> {
     if (Object.values(query).length === 0)
       return await this.postsRepository.find();
     else {
-      const tagsToSearch = Array.isArray(query.tag) ? query.tag : [query.tag];
       return await this.postsRepository.find({
         where: {
           tags: {
-            name: In(tagsToSearch),
+            name: In(query.tag),
           },
         },
         relations: { comments: true, tags: true },
@@ -37,14 +37,13 @@ export class PostsService {
   ): Promise<Post> {
     const tags = [];
     if (createPostDto.tags) {
-      for (const tagName of createPostDto.tags) {
-        const existingTag = await this.tagsRepository.findOne({
-          where: { name: tagName },
-        });
+      const lowerCaseTags = createPostDto.tags.map(capitalizeName);
+      for (const tagName of lowerCaseTags) {
+        const existingTag = await this.tagService.findTag(tagName);
         if (existingTag) {
           tags.push(existingTag);
         } else {
-          const newTag = this.tagsRepository.create({ name: tagName });
+          const newTag = await this.tagService.createTag({ name: tagName });
           tags.push(newTag);
         }
       }
@@ -76,13 +75,11 @@ export class PostsService {
 
     if (tags) {
       for (const tagName of tags) {
-        const existingTag = await this.tagsRepository.findOne({
-          where: { name: tagName },
-        });
+        const existingTag = await this.tagService.findTag(tagName);
         if (existingTag) {
           useTags.push(existingTag);
         } else {
-          const newTag = this.tagsRepository.create({ name: tagName });
+          const newTag = this.tagService.createTag({ name: tagName });
           useTags.push(newTag);
         }
       }

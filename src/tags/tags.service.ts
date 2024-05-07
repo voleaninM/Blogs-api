@@ -16,12 +16,14 @@ export class TagsService {
   ) {}
 
   async createTag(tagDto: CreateTagDto): Promise<Tag> {
-    const existingUser = await this.tagsRepository.findOne({
+    const { name } = tagDto;
+    const existingTag = await this.tagsRepository.findOne({
       where: {
-        name: tagDto.name,
+        name,
       },
     });
-    if (existingUser) {
+
+    if (existingTag) {
       throw new ConflictException('Tag with this name already exists');
     }
     const tag = this.tagsRepository.create(tagDto);
@@ -35,5 +37,17 @@ export class TagsService {
       throw new NotFoundException(`A Tag "${id}" was not found`);
     }
     return { message: 'Tag successfully deleted' };
+  }
+
+  async findTag(tagName: string): Promise<Tag> {
+    console.log(
+      await this.tagsRepository.findOne({
+        where: { name: tagName },
+      }),
+    );
+
+    return await this.tagsRepository.findOne({
+      where: { name: tagName },
+    });
   }
 }

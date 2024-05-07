@@ -15,8 +15,9 @@ import { PostsService } from './posts.service';
 import { ApiTags } from '@nestjs/swagger';
 import { CreatePostDto, UpdatePostDto, FilterOptionsDto } from './post.dto';
 import { Public } from 'src/decorators/public.decorator';
-import { OwnerGuard } from './owner.guard';
+import { OwnerGuard } from '../guards/owner.guard';
 import { Post as PostEntity } from './post.entity';
+import { CapitalizeQueryPipe } from 'src/pipes/capitalize.pipe';
 
 @ApiTags('posts')
 @Controller('posts')
@@ -25,7 +26,9 @@ export class PostsController {
 
   @Public()
   @Get()
-  getAll(@Query() query: FilterOptionsDto): Promise<PostEntity[]> {
+  getAll(
+    @Query(CapitalizeQueryPipe) query: FilterOptionsDto,
+  ): Promise<PostEntity[]> {
     return this.postsService.getAll(query);
   }
 
