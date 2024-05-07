@@ -1,0 +1,37 @@
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
+import { LoginDto } from 'src/users/user.dto';
+import { UsersService } from 'src/users/users.service';
+import * as bcrypt from 'bcrypt';
+import { User } from 'src/users/user.entity';
+
+@Injectable()
+export class AuthService {
+  constructor(
+    private usersService: UsersService,
+    private jwtService: JwtService,
+  ) {}
+  private async validatePassword(
+    password: string,
+    hashedPass: string,
+  ): Promise<boolean> {
+    return await bcrypt.compare(password, hashedPass);
+  }
+  async validateUser(loginDto: LoginDto): Promise<User> {
+    const { username, password } = loginDto;
+    const user = await this.usersService.findByUsername(username);
+
+    if (user && (await this.validatePassword(password, user.password))) {
+      return user;
+    } else {
+      throw new NotFoundException('Wrong data');
+    }
+  }
+
+  async login(user: User) {
+    const payload = { username: user.username, sub: user.id };
+    return {
+      access_token: this.jwtService.sign(payload),
+    };
+  }
+}
