@@ -39,15 +39,9 @@ export class TagsService {
     return { message: 'Tag successfully deleted' };
   }
 
-  async findTag(tagName: string): Promise<Tag> {
-    console.log(
-      await this.tagsRepository.findOne({
-        where: { name: tagName },
-      }),
-    );
-
-    return await this.tagsRepository.findOne({
-      where: { name: tagName },
+  async findTagByName(tagName: string): Promise<Tag> {
+    return await this.tagsRepository.findOneBy({
+      name: tagName,
     });
   }
 }

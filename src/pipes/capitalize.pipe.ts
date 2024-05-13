@@ -1,22 +1,15 @@
 import { PipeTransform, Injectable, ArgumentMetadata } from '@nestjs/common';
 import { FilterOptionsDto } from 'src/posts/post.dto';
-import { CreateTagDto } from 'src/tags/tag.dto';
 import { capitalizeName } from 'src/utils';
-
-@Injectable()
-export class CapitalizeTagPipe implements PipeTransform {
-  transform(value: CreateTagDto): CreateTagDto {
-    value.name = capitalizeName(value.name);
-    return value;
-  }
-}
-
 @Injectable()
 export class CapitalizeQueryPipe implements PipeTransform {
-  transform(value: FilterOptionsDto): FilterOptionsDto {
-    const tags = Array.isArray(value.tag) ? value.tag : [value.tag];
-    const capitalizedTags = tags.map(capitalizeName);
-    value.tag = capitalizedTags;
-    return value;
+  transform(query: FilterOptionsDto): FilterOptionsDto {
+    for (const key of Object.keys(query)) {
+      const values = Array.isArray(query[key]) ? query[key] : [query[key]];
+      const capitalizedValues = values.map(capitalizeName);
+      query[key] = capitalizedValues;
+    }
+
+    return query;
   }
 }

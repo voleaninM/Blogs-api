@@ -4,15 +4,14 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateCommentDto, UpdateCommentDto } from './comment.dto';
 import { Comment } from './comment.entity';
-import { Post } from 'src/posts/post.entity';
+import { PostsService } from 'src/posts/posts.service';
 
 @Injectable()
 export class CommentsService {
   constructor(
+    private postsService: PostsService,
     @InjectRepository(Comment)
     private commentsRepository: Repository<Comment>,
-    @InjectRepository(Post)
-    private postsRepository: Repository<Comment>,
   ) {}
 
   async getAll(): Promise<Comment[]> {
@@ -20,9 +19,7 @@ export class CommentsService {
   }
 
   async getPostComments(postId: number): Promise<Comment[]> {
-    const comments = await this.commentsRepository.find({
-      where: { postId: postId },
-    });
+    const comments = await this.commentsRepository.findBy({ postId: postId });
     if (comments.length === 0) {
       throw new NotFoundException(`Comments with Post ${postId} not found`);
     }
@@ -34,9 +31,7 @@ export class CommentsService {
     postId: number,
     id: number,
   ): Promise<Comment> {
-    const post = await this.postsRepository.findOne({
-      where: { id: postId },
-    });
+    const post = await this.postsService.findPostById(postId);
     if (!post) {
       throw new NotFoundException(`Post ${postId} not found`);
     } else {
@@ -50,9 +45,7 @@ export class CommentsService {
   }
 
   async findComment(id: number): Promise<Comment> {
-    const comment = await this.commentsRepository.findOne({
-      where: { id: id },
-    });
+    const comment = await this.commentsRepository.findOneBy({ id: id });
     if (!comment) {
       throw new NotFoundException(`Comment with ID ${id} not found`);
     }
@@ -63,9 +56,7 @@ export class CommentsService {
     id: number,
     updateCommentDto: UpdateCommentDto,
   ): Promise<Comment> {
-    const comment = await this.commentsRepository.findOne({
-      where: { id: id },
-    });
+    const comment = await this.commentsRepository.findOneBy({ id: id });
     const updatedComment = { ...comment, ...updateCommentDto };
     return await this.commentsRepository.save(updatedComment);
   }

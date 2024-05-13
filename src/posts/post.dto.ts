@@ -22,6 +22,7 @@ export class UpdatePostDto extends PartialType(
 ) {}
 
 export class FilterOptionsDto {
+  @IsOptional()
   @IsString()
   tag: string[];
 }

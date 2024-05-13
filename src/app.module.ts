@@ -12,6 +12,7 @@ import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { TagSubscriber } from './subscribers/tag-subscriber';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard';
       type: 'sqlite',
       database: 'db/sql',
       synchronize: true,
+      subscribers: [TagSubscriber],
       entities: [Post, Comment, Tag, User],
     }),
     AuthModule,

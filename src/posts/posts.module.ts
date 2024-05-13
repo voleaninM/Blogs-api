@@ -9,6 +9,6 @@ import { TagsModule } from 'src/tags/tags.module';
   controllers: [PostsController],
   providers: [PostsService],
   imports: [TagsModule, TypeOrmModule.forFeature([Post])],
-  exports: [],
+  exports: [PostsService],
 })
 export class PostsModule {}

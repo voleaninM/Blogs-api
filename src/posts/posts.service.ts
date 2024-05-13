@@ -3,9 +3,7 @@ import { Post } from './post.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreatePostDto, FilterOptionsDto, UpdatePostDto } from './post.dto';
-import { Tag } from 'src/tags/tag.entity';
 import { In } from 'typeorm';
-import { capitalizeName } from 'src/utils';
 import { TagsService } from 'src/tags/tags.service';
 
 @Injectable()
@@ -37,9 +35,8 @@ export class PostsService {
   ): Promise<Post> {
     const tags = [];
     if (createPostDto.tags) {
-      const lowerCaseTags = createPostDto.tags.map(capitalizeName);
-      for (const tagName of lowerCaseTags) {
-        const existingTag = await this.tagService.findTag(tagName);
+      for (const tagName of createPostDto.tags) {
+        const existingTag = await this.tagService.findTagByName(tagName);
         if (existingTag) {
           tags.push(existingTag);
         } else {
@@ -50,7 +47,6 @@ export class PostsService {
     }
     createPostDto.userId = userId;
     const post = this.postsRepository.create({ ...createPostDto, tags });
-
     return await this.postsRepository.save(post);
   }
 
@@ -66,7 +62,7 @@ export class PostsService {
   }
 
   async updatePost(id: number, updatePostDto: UpdatePostDto): Promise<Post> {
-    const post = await this.postsRepository.findOne({ where: { id: id } });
+    const post = await this.postsRepository.findOneBy({ id: id });
     if (!post) {
       throw new NotFoundException(`A Post with ID ${id} was not found`);
     }
@@ -75,7 +71,7 @@ export class PostsService {
 
     if (tags) {
       for (const tagName of tags) {
-        const existingTag = await this.tagService.findTag(tagName);
+        const existingTag = await this.tagService.findTagByName(tagName);
         if (existingTag) {
           useTags.push(existingTag);
         } else {
@@ -97,5 +93,9 @@ export class PostsService {
       throw new NotFoundException(`A Post "${id}" was not found`);
     }
     return { message: 'Post successfully deleted' };
+  }
+
+  async findPostById(id: number): Promise<Post> {
+    return await this.postsRepository.findOneBy({ id: id });
   }
 }

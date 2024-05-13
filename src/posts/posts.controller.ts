@@ -9,7 +9,6 @@ import {
   Query,
   Request,
   UseGuards,
-  ValidationPipe,
 } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { ApiTags } from '@nestjs/swagger';
@@ -34,7 +33,7 @@ export class PostsController {
 
   @Post()
   createPost(
-    @Body(new ValidationPipe()) createPostDto: CreatePostDto,
+    @Body() createPostDto: CreatePostDto,
     @Request() req,
   ): Promise<PostEntity> {
     const { id: userId } = req.user;
