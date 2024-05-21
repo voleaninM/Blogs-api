@@ -37,6 +37,7 @@ export class PostsService {
     if (createPostDto.tags) {
       for (const tagName of createPostDto.tags) {
         const existingTag = await this.tagService.findTagByName(tagName);
+
         if (existingTag) {
           tags.push(existingTag);
         } else {

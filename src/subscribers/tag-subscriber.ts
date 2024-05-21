@@ -1,5 +1,4 @@
 import { Tag } from 'src/tags/tag.entity';
-import { capitalizeName } from 'src/utils';
 import {
   EntitySubscriberInterface,
   EventSubscriber,
@@ -14,7 +13,7 @@ export class TagSubscriber implements EntitySubscriberInterface<Tag> {
 
   async beforeInsert(event: InsertEvent<Tag>) {
     const { name } = event.entity;
-    const updatedName = capitalizeName(name);
+    const updatedName = name.toLowerCase();
 
     event.entity.name = updatedName;
   }

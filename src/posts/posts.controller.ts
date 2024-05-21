@@ -16,7 +16,7 @@ import { CreatePostDto, UpdatePostDto, FilterOptionsDto } from './post.dto';
 import { Public } from 'src/decorators/public.decorator';
 import { OwnerGuard } from '../guards/owner.guard';
 import { Post as PostEntity } from './post.entity';
-import { CapitalizeQueryPipe } from 'src/pipes/capitalize.pipe';
+import { NormalizeQueryPipe } from 'src/pipes/query.pipe';
 
 @ApiTags('posts')
 @Controller('posts')
@@ -26,7 +26,7 @@ export class PostsController {
   @Public()
   @Get()
   getAll(
-    @Query(CapitalizeQueryPipe) query: FilterOptionsDto,
+    @Query(NormalizeQueryPipe) query: FilterOptionsDto,
   ): Promise<PostEntity[]> {
     return this.postsService.getAll(query);
   }

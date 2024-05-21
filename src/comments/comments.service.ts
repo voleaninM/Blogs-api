@@ -20,8 +20,9 @@ export class CommentsService {
 
   async getPostComments(postId: number): Promise<Comment[]> {
     const comments = await this.commentsRepository.findBy({ postId: postId });
+
     if (comments.length === 0) {
-      throw new NotFoundException(`Comments with Post ${postId} not found`);
+      throw new NotFoundException(`Comments for Post ${postId} not found`);
     }
     return comments;
   }
@@ -36,16 +37,15 @@ export class CommentsService {
       throw new NotFoundException(`Post ${postId} not found`);
     } else {
       createCommentDto.userId = id;
-      const comment = {
-        ...this.commentsRepository.create(createCommentDto),
-        postId,
-      };
+      createCommentDto.postId = postId;
+      const comment = this.commentsRepository.create(createCommentDto);
       return await this.commentsRepository.save(comment);
     }
   }
 
   async findComment(id: number): Promise<Comment> {
     const comment = await this.commentsRepository.findOneBy({ id: id });
+
     if (!comment) {
       throw new NotFoundException(`Comment with ID ${id} not found`);
     }

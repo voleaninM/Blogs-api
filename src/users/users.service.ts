@@ -4,7 +4,6 @@ import { Repository } from 'typeorm';
 import { User } from './user.entity';
 import { CreateUserDto, UpdateUserDto, UserResponseDto } from './user.dto';
 import * as bcrypt from 'bcrypt';
-import { use } from 'passport';
 
 @Injectable()
 export class UsersService {
@@ -40,12 +39,13 @@ export class UsersService {
     updateUserDto: UpdateUserDto,
     userId: number,
   ): Promise<UserResponseDto> {
-    const { password, ...updateData } = updateUserDto;
     if (Object.values(updateUserDto).length === 0) {
       throw new ConflictException('Provide Data');
     }
-    const user = await this.usersRepository.findOne({
-      where: { id: userId },
+    const { password, ...updateData } = updateUserDto;
+
+    const user = await this.usersRepository.findOneBy({
+      id: userId,
     });
     if (password) {
       user.password = await this.hashPassword(password, 10);

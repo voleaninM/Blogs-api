@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { Tag } from './tag.entity';
 import { CreateTagDto } from './tag.dto';
-import { Repository } from 'typeorm';
+import { Repository, ILike } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
@@ -17,11 +17,7 @@ export class TagsService {
 
   async createTag(tagDto: CreateTagDto): Promise<Tag> {
     const { name } = tagDto;
-    const existingTag = await this.tagsRepository.findOne({
-      where: {
-        name,
-      },
-    });
+    const existingTag = await this.findTagByName(name);
 
     if (existingTag) {
       throw new ConflictException('Tag with this name already exists');
@@ -33,15 +29,16 @@ export class TagsService {
 
   async deleteTag(id: number) {
     const result = await this.tagsRepository.delete(id);
+
     if (result.affected === 0) {
-      throw new NotFoundException(`A Tag "${id}" was not found`);
+      throw new NotFoundException(`A Tag ${id} was not found`);
     }
     return { message: 'Tag successfully deleted' };
   }
 
   async findTagByName(tagName: string): Promise<Tag> {
     return await this.tagsRepository.findOneBy({
-      name: tagName,
+      name: ILike(`%${tagName}%`),
     });
   }
 }
