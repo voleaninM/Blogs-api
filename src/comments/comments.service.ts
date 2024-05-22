@@ -4,7 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateCommentDto, UpdateCommentDto } from './comment.dto';
 import { Comment } from './comment.entity';
-import { PostsService } from 'src/posts/posts.service';
+import { PostsService } from '../posts/posts.service';
 
 @Injectable()
 export class CommentsService {
@@ -32,7 +32,7 @@ export class CommentsService {
     postId: number,
     id: number,
   ): Promise<Comment> {
-    const post = await this.postsService.findPostById(postId);
+    const post = await this.postsService.findPost(postId);
     if (!post) {
       throw new NotFoundException(`Post ${postId} not found`);
     } else {

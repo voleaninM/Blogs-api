@@ -1,9 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { TagsService } from 'src/tags/tags.service';
-import { CreatePostDto, FilterOptionsDto } from './post.dto';
+import { CreatePostDto, FilterOptionsDto, UpdatePostDto } from './post.dto';
 import { Post } from './post.entity';
 import { PostsService } from './posts.service';
+import { NotFoundException } from '@nestjs/common';
 
 describe('PostsService', () => {
   let postsService: PostsService;
@@ -25,7 +26,7 @@ describe('PostsService', () => {
     deleteTag: jest.fn(),
     findTagByName: jest.fn(),
   };
-  const deleteResponse = 'Post successfully deleted';
+  const deleteResponse = { message: 'Post successfully deleted' };
 
   beforeEach(async () => {
     postsRepoStab = {
@@ -90,5 +91,54 @@ describe('PostsService', () => {
 
     //assert
     expect(result).toEqual(expectedResult);
+  });
+
+  it('should throw NotFoundException if no post found', async () => {
+    //arrange
+    const expectedResult = 'Post with ID 1 not found';
+
+    //act
+    jest.spyOn(postsRepoStab, 'findOne').mockResolvedValueOnce(null);
+    const result = postsService.findPost(fakePosts[0].id);
+
+    //assert
+    await expect(result).rejects.toThrow(new NotFoundException(expectedResult));
+  });
+
+  it('should update a post', async () => {
+    //arrange
+    const expectedResult = fakePosts[0];
+
+    //act
+    const result = await postsService.updatePost(1, {} as UpdatePostDto);
+
+    //assert
+    expect(result).toEqual(expectedResult);
+  });
+
+  it('should delete post', async () => {
+    //arrange
+    const expectedResult = deleteResponse;
+
+    //act
+    const result = await postsService.deletePost(fakePosts[0].id);
+
+    //assert
+    expect(result).toEqual(expectedResult);
+  });
+
+  it('should throw NotFoundException if post does not exist', async () => {
+    //arrange
+    const commentToDelete = fakePosts[0];
+    const expectedError = 'A Post 1 was not found';
+
+    //act
+    postsRepoStab.delete = () => {
+      return { affected: 0 };
+    };
+    const result = postsService.deletePost(commentToDelete.id);
+
+    //assert
+    await expect(result).rejects.toThrow(new NotFoundException(expectedError));
   });
 });

@@ -1,5 +1,5 @@
 import {
-  ConflictException,
+  BadRequestException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -20,7 +20,7 @@ export class TagsService {
     const existingTag = await this.findTagByName(name);
 
     if (existingTag) {
-      throw new ConflictException('Tag with this name already exists');
+      throw new BadRequestException('Tag with this name already exists');
     }
     const tag = this.tagsRepository.create(tagDto);
 
@@ -30,10 +30,9 @@ export class TagsService {
   async deleteTag(id: number) {
     const result = await this.tagsRepository.delete(id);
 
-    if (result.affected === 0) {
-      throw new NotFoundException(`A Tag ${id} was not found`);
+    if (!result.affected) {
+      throw new NotFoundException();
     }
-    return { message: 'Tag successfully deleted' };
   }
 
   async findTagByName(tagName: string): Promise<Tag> {

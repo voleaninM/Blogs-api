@@ -13,10 +13,6 @@ describe('UsersService', () => {
     { id: 1, username: 'max', password: '323232', email: 'email' },
   ];
 
-  const bcryptLib = {
-    hash: jest.fn(),
-  };
-
   beforeEach(async () => {
     usersRepoStab = {
       findBy: () => Promise.resolve(fakeUsers),
@@ -41,14 +37,13 @@ describe('UsersService', () => {
     expect(userService).toBeDefined();
   });
 
-  it('should create a comment', async () => {
+  it('should create a user', async () => {
     //arrange
     const expectedResult = {} as UserResponseDto;
 
     //act
     jest.spyOn(userService, 'findByUsername').mockResolvedValue(null);
-    jest.spyOn(bcryptLib, 'hash').mockResolvedValue('323232');
-    const result = await userService.createUser({ password: '32' } as User);
+    const result = await userService.createUser({ password: '323232' } as User);
 
     //assert
     expect(result).toEqual(expectedResult);

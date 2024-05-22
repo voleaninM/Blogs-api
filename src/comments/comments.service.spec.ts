@@ -21,7 +21,6 @@ describe('CommentsService', () => {
     findPost: jest.fn(),
     updatePost: jest.fn(),
     deletePost: jest.fn(),
-    findPostById: jest.fn(),
   };
   const deleteResponse = { message: 'Comment successfully deleted' };
 
@@ -98,7 +97,7 @@ describe('CommentsService', () => {
     const expectedResult = fakeComments[0];
 
     //act
-    jest.spyOn(postsService, 'findPostById').mockResolvedValue({} as Post);
+    jest.spyOn(postsService, 'findPost').mockResolvedValue({} as Post);
     const result = await commentsService.createComment(
       {} as CreateCommentDto,
       1,
@@ -114,7 +113,7 @@ describe('CommentsService', () => {
     const expectedResult = 'Post 1 not found';
 
     //act
-    jest.spyOn(postsService, 'findPostById').mockResolvedValue(null);
+    jest.spyOn(postsService, 'findPost').mockResolvedValue(null);
     const result = commentsService.createComment({} as CreateCommentDto, 1, 1);
 
     //assert
@@ -160,7 +159,7 @@ describe('CommentsService', () => {
     expect(result).toEqual(expectedResult);
   });
 
-  it('should delete the tag', async () => {
+  it('should delete the comment', async () => {
     //arrange
     const commentToDelete = fakeComments[0];
     const expectedResult = deleteResponse;
@@ -172,7 +171,7 @@ describe('CommentsService', () => {
     expect(result).toEqual(expectedResult);
   });
 
-  it('should throw NotFoundException if tag does not exist', async () => {
+  it('should throw NotFoundException if comment does not exist', async () => {
     //arrange
     const commentToDelete = fakeComments[0];
     const expectedError = 'A Comment 1 was not found';

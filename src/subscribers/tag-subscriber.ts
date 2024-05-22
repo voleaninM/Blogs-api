@@ -1,4 +1,4 @@
-import { Tag } from 'src/tags/tag.entity';
+import { Tag } from '../tags/tag.entity';
 import {
   EntitySubscriberInterface,
   EventSubscriber,

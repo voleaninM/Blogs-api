@@ -1,5 +1,5 @@
 import { PipeTransform, Injectable } from '@nestjs/common';
-import { FilterOptionsDto } from 'src/posts/post.dto';
+import { FilterOptionsDto } from '../posts/post.dto';
 @Injectable()
 export class NormalizeQueryPipe implements PipeTransform {
   transform(query: FilterOptionsDto): FilterOptionsDto {

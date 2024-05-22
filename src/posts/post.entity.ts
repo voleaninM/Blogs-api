@@ -1,5 +1,5 @@
-import { Comment } from 'src/comments/comment.entity';
-import { Tag } from 'src/tags/tag.entity';
+import { Comment } from '../comments/comment.entity';
+import { Tag } from '../tags/tag.entity';
 import {
   Entity,
   PrimaryGeneratedColumn,

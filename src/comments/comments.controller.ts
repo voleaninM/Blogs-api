@@ -12,7 +12,7 @@ import {
 import { CommentsService } from './comments.service';
 import { ApiTags } from '@nestjs/swagger';
 import { CreateCommentDto, UpdateCommentDto } from './comment.dto';
-import { Public } from 'src/decorators/public.decorator';
+import { Public } from '../decorators/public.decorator';
 import { CommentOwnerGuard } from '../guards/comments-owner.guard';
 import { Comment } from './comment.entity';
 
