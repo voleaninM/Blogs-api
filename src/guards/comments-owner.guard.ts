@@ -1,4 +1,9 @@
-import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
+import {
+  Injectable,
+  CanActivate,
+  ExecutionContext,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Comment } from '../comments/comment.entity';
@@ -13,11 +18,12 @@ export class CommentOwnerGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
     const requestUserId = request.user.id;
     const requestParam = request.params.id;
-    const comment = await this.commentsRepository.findOne({
-      where: { id: requestParam },
+    const comment = await this.commentsRepository.findOneBy({
+      id: requestParam,
     });
-    console.log(comment.userId, requestUserId);
-
+    if (!comment) {
+      throw new NotFoundException();
+    }
     return comment.userId === requestUserId;
   }
 }

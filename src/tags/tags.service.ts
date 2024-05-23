@@ -29,7 +29,6 @@ export class TagsService {
 
   async deleteTag(id: number) {
     const result = await this.tagsRepository.delete(id);
-
     if (!result.affected) {
       throw new NotFoundException();
     }
