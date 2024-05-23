@@ -1,7 +1,7 @@
-import { ConflictException } from '@nestjs/common';
+import { BadRequestException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { UpdateUserDto, UserResponseDto } from './user.dto';
+import { UserResponseDto } from './user.dto';
 import { User } from './user.entity';
 import { UsersService } from './users.service';
 
@@ -49,7 +49,7 @@ describe('UsersService', () => {
     expect(result).toEqual(expectedResult);
   });
 
-  it('should throw ConflictException if username already exists', async () => {
+  it('should throw 400 if username already exists', async () => {
     //arrange
     const expectedResult = 'User with this username already exists';
 
@@ -57,7 +57,9 @@ describe('UsersService', () => {
     const result = userService.createUser(fakeUsers[0]);
 
     //assert
-    await expect(result).rejects.toThrow(new ConflictException(expectedResult));
+    await expect(result).rejects.toThrow(
+      new BadRequestException(expectedResult),
+    );
   });
 
   it('should update a user', async () => {
@@ -79,7 +81,9 @@ describe('UsersService', () => {
     const result = userService.updateUser({}, 1);
 
     //assert
-    await expect(result).rejects.toThrow(new ConflictException(expectedResult));
+    await expect(result).rejects.toThrow(
+      new BadRequestException(expectedResult),
+    );
   });
 
   it('should return a user by username', async () => {

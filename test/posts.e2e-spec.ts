@@ -3,7 +3,7 @@ import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from './../src/app.module';
 
-describe('TagsController (e2e)', () => {
+describe('PostsController (e2e)', () => {
   let app: INestApplication;
   let jwtToken: string;
 
@@ -26,36 +26,62 @@ describe('TagsController (e2e)', () => {
     jwtToken = response.body.access_token;
   });
 
-  it('should create a new tag', () => {
+  it('should return all posts', () => {
+    return request(app.getHttpServer()).get('/posts').expect(200);
+  });
+
+  it('should create a new post', () => {
     return request(app.getHttpServer())
-      .post('/tags')
+      .post('/posts')
       .set('Authorization', 'Bearer ' + jwtToken)
       .send({
-        name: 'testingTag2',
+        title: 'post3',
+        description: 'description3',
       })
       .expect(201);
   });
 
-  it('should not create a new tag if existing', () => {
-    return request(app.getHttpServer())
-      .post('/tags')
-      .set('Authorization', 'Bearer ' + jwtToken)
-      .send({
-        name: 'testingTag1',
-      })
-      .expect(400);
+  it('should return a single post', () => {
+    return request(app.getHttpServer()).get('/posts/1').expect(200);
   });
 
-  it('should delete a tag', () => {
+  it('should return 404 if there is no post', () => {
     return request(app.getHttpServer())
-      .delete('/tags/2')
+      .post('/posts/99')
+      .set('Authorization', 'Bearer ' + jwtToken)
+      .expect(404);
+  });
+
+  it('should update a post', () => {
+    return request(app.getHttpServer())
+      .patch('/posts/1')
+      .set('Authorization', 'Bearer ' + jwtToken)
+      .send({
+        title: 'updated title',
+      })
+      .expect(200);
+  });
+
+  it('should return 403 if you are not and owner of the post', () => {
+    return request(app.getHttpServer())
+      .patch('/posts/5')
+      .set('Authorization', 'Bearer ' + jwtToken)
+      .send({
+        title: 'updated title',
+      })
+      .expect(403);
+  });
+
+  it('should delete a post', () => {
+    return request(app.getHttpServer())
+      .delete('/posts/2')
       .set('Authorization', 'Bearer ' + jwtToken)
       .expect(200);
   });
 
-  it('should return 404 if there is no tag', () => {
+  it('should return 404 if there is no comment', () => {
     return request(app.getHttpServer())
-      .delete('/tags/99')
+      .delete('/posts/99')
       .set('Authorization', 'Bearer ' + jwtToken)
       .expect(404);
   });

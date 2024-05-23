@@ -9,7 +9,7 @@ import { TagsModule } from './tags/tags.module';
 import { Tag } from './tags/tag.entity';
 import { User } from './users/user.entity';
 import { AuthModule } from './auth/auth.module';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { TagSubscriber } from './subscribers/tag-subscriber';
@@ -18,13 +18,19 @@ import { TagSubscriber } from './subscribers/tag-subscriber';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+      envFilePath: `.env.${process.env.NODE_ENV}`,
     }),
-    TypeOrmModule.forRoot({
-      type: 'sqlite',
-      database: 'db/sql',
-      synchronize: true,
-      subscribers: [TagSubscriber],
-      entities: [Post, Comment, Tag, User],
+
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: (configService: ConfigService) => ({
+        type: 'sqlite',
+        database: configService.get('DATABASE_NAME'),
+        entities: [Post, Comment, Tag, User],
+        synchronize: true,
+        subscribers: [TagSubscriber],
+      }),
+      inject: [ConfigService],
     }),
     AuthModule,
     PostsModule,

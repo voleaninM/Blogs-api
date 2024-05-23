@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { LoginDto } from '../users/user.dto';
 import { UsersService } from '../users/users.service';
@@ -24,7 +24,7 @@ export class AuthService {
     if (user && (await this.validatePassword(password, user.password))) {
       return user;
     } else {
-      throw new NotFoundException('Wrong data');
+      throw new BadRequestException('Wrong data');
     }
   }
 

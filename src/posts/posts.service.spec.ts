@@ -26,7 +26,6 @@ describe('PostsService', () => {
     deleteTag: jest.fn(),
     findTagByName: jest.fn(),
   };
-  const deleteResponse = { message: 'Post successfully deleted' };
 
   beforeEach(async () => {
     postsRepoStab = {
@@ -36,7 +35,7 @@ describe('PostsService', () => {
       create: () => fakePosts[0],
       save: () => Promise.resolve(fakePosts[0]),
       findOneBy: () => Promise.resolve(fakePosts[0]),
-      delete: () => Promise.resolve(deleteResponse),
+      delete: () => Promise.resolve({ affected: 1 }),
     };
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -93,16 +92,15 @@ describe('PostsService', () => {
     expect(result).toEqual(expectedResult);
   });
 
-  it('should throw NotFoundException if no post found', async () => {
+  it('should throw 404 if no post found', async () => {
     //arrange
-    const expectedResult = 'Post with ID 1 not found';
 
     //act
     jest.spyOn(postsRepoStab, 'findOne').mockResolvedValueOnce(null);
     const result = postsService.findPost(fakePosts[0].id);
 
     //assert
-    await expect(result).rejects.toThrow(new NotFoundException(expectedResult));
+    await expect(result).rejects.toThrow(new NotFoundException());
   });
 
   it('should update a post', async () => {
@@ -118,19 +116,16 @@ describe('PostsService', () => {
 
   it('should delete post', async () => {
     //arrange
-    const expectedResult = deleteResponse;
-
     //act
     const result = await postsService.deletePost(fakePosts[0].id);
 
     //assert
-    expect(result).toEqual(expectedResult);
+    expect(result).toBeUndefined();
   });
 
   it('should throw NotFoundException if post does not exist', async () => {
     //arrange
     const commentToDelete = fakePosts[0];
-    const expectedError = 'A Post 1 was not found';
 
     //act
     postsRepoStab.delete = () => {
@@ -139,6 +134,6 @@ describe('PostsService', () => {
     const result = postsService.deletePost(commentToDelete.id);
 
     //assert
-    await expect(result).rejects.toThrow(new NotFoundException(expectedError));
+    await expect(result).rejects.toThrow(new NotFoundException());
   });
 });

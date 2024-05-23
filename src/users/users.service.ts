@@ -1,4 +1,4 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './user.entity';
@@ -21,7 +21,7 @@ export class UsersService {
     const existingUser = await this.findByUsername(username);
 
     if (existingUser) {
-      throw new ConflictException('User with this username already exists');
+      throw new BadRequestException('User with this username already exists');
     }
     const user = this.usersRepository.create({
       email,
@@ -41,7 +41,7 @@ export class UsersService {
     userId: number,
   ): Promise<UserResponseDto> {
     if (Object.values(updateUserDto).length === 0) {
-      throw new ConflictException('Provide Data');
+      throw new BadRequestException('Provide Data');
     }
     const { password, ...updateData } = updateUserDto;
 

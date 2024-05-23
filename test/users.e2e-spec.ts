@@ -3,7 +3,7 @@ import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from './../src/app.module';
 
-describe('TagsController (e2e)', () => {
+describe('UsersController (e2e)', () => {
   let app: INestApplication;
   let jwtToken: string;
 
@@ -20,43 +20,41 @@ describe('TagsController (e2e)', () => {
       .send({
         username: 'Maka2',
         password: '323232',
-      })
-      .expect(201);
+      });
 
     jwtToken = response.body.access_token;
   });
 
-  it('should create a new tag', () => {
+  it('should create a new user', () => {
     return request(app.getHttpServer())
-      .post('/tags')
-      .set('Authorization', 'Bearer ' + jwtToken)
+      .post('/users/register')
       .send({
-        name: 'testingTag2',
+        username: 'Maka5',
+        password: '323232',
+        email: 'maka3@email.com',
       })
       .expect(201);
   });
 
-  it('should not create a new tag if existing', () => {
+  it('should not create a new user if existing', () => {
     return request(app.getHttpServer())
-      .post('/tags')
+      .post('/users/register')
       .set('Authorization', 'Bearer ' + jwtToken)
       .send({
-        name: 'testingTag1',
+        username: 'Maka3',
+        password: '323232',
+        email: 'maka@email.com',
       })
       .expect(400);
   });
 
-  it('should delete a tag', () => {
+  it('should update a user', () => {
     return request(app.getHttpServer())
-      .delete('/tags/2')
+      .patch('/users/update')
       .set('Authorization', 'Bearer ' + jwtToken)
+      .send({
+        username: 'new Username',
+      })
       .expect(200);
-  });
-
-  it('should return 404 if there is no tag', () => {
-    return request(app.getHttpServer())
-      .delete('/tags/99')
-      .set('Authorization', 'Bearer ' + jwtToken)
-      .expect(404);
   });
 });

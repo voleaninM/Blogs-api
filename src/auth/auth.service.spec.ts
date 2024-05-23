@@ -5,7 +5,7 @@ import { JwtService } from '@nestjs/jwt';
 import { User } from 'src/users/user.entity';
 import { LoginDto } from 'src/users/user.dto';
 import * as bcrypt from 'bcrypt';
-import { NotFoundException } from '@nestjs/common';
+import { BadRequestException } from '@nestjs/common';
 
 describe('AuthService', () => {
   let authService: AuthService;
@@ -69,7 +69,7 @@ describe('AuthService', () => {
     expect(result).toEqual(expectedResult);
   });
 
-  it('should throw NotFoundException if no such user', async () => {
+  it('should throw 400 if no such user', async () => {
     //arrange
     const expectedResult = { message: 'Wrong data' };
 
@@ -80,7 +80,9 @@ describe('AuthService', () => {
     } as LoginDto);
 
     //assert
-    await expect(result).rejects.toThrow(new NotFoundException(expectedResult));
+    await expect(result).rejects.toThrow(
+      new BadRequestException(expectedResult),
+    );
   });
 
   it('should login user', async () => {
