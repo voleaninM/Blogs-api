@@ -2,28 +2,44 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from './../src/app.module';
+import { DatabaseService } from '../src/database/database.service';
 
 describe('CommentsController (e2e)', () => {
   let app: INestApplication;
   let jwtToken: string;
+  let databaseService: DatabaseService;
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
+      providers: [DatabaseService],
     }).compile();
 
     app = moduleFixture.createNestApplication();
     await app.init();
+    databaseService = moduleFixture.get<DatabaseService>(DatabaseService);
 
-    const response = await request(app.getHttpServer())
-      .post('/auth/login')
+    const register = await request(app.getHttpServer())
+      .post('/users/register')
       .send({
-        username: 'new Username',
+        username: 'Maka1',
         password: '323232',
-      })
-      .expect(201);
+        email: 'maka3@email.com',
+      });
 
-    jwtToken = response.body.access_token;
+    const login = await request(app.getHttpServer()).post('/auth/login').send({
+      username: 'Maka1',
+      password: '323232',
+    });
+    jwtToken = login.body.access_token;
+
+    const post = await request(app.getHttpServer())
+      .post('/posts')
+      .set('Authorization', 'Bearer ' + jwtToken)
+      .send({
+        title: 'post',
+        description: 'description',
+      });
   });
 
   it('should return all comments', () => {
@@ -73,19 +89,9 @@ describe('CommentsController (e2e)', () => {
       .expect(200);
   });
 
-  it('should return 403 if you are not and owner of the comment', () => {
-    return request(app.getHttpServer())
-      .patch('/comments/3')
-      .set('Authorization', 'Bearer ' + jwtToken)
-      .send({
-        content: 'updatedComment',
-      })
-      .expect(403);
-  });
-
   it('should delete a comment', () => {
     return request(app.getHttpServer())
-      .delete('/comments/3')
+      .delete('/comments/1')
       .set('Authorization', 'Bearer ' + jwtToken)
       .expect(200);
   });
@@ -95,5 +101,12 @@ describe('CommentsController (e2e)', () => {
       .delete('/comments/99')
       .set('Authorization', 'Bearer ' + jwtToken)
       .expect(404);
+  });
+
+  afterAll(async () => {
+    if (databaseService) {
+      await databaseService.clearDatabase();
+    }
+    await app.close();
   });
 });

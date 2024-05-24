@@ -19,11 +19,11 @@ export class CommentsService {
   }
 
   async getPostComments(postId: number): Promise<Comment[]> {
-    const comments = await this.commentsRepository.findBy({ postId: postId });
-
-    if (!comments.length) {
+    const post = await this.postsService.findPost(postId);
+    if (!post) {
       throw new NotFoundException();
     }
+    const comments = await this.commentsRepository.findBy({ postId: postId });
     return comments;
   }
 
