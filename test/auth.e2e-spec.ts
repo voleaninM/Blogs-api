@@ -19,7 +19,7 @@ describe('AuthController (e2e)', () => {
     databaseService = moduleFixture.get<DatabaseService>(DatabaseService);
 
     const register = await request(app.getHttpServer())
-      .post('/users/register')
+      .post('/auth/signup')
       .send({
         username: 'Maka1',
         password: '323232',
@@ -34,8 +34,8 @@ describe('AuthController (e2e)', () => {
         username: 'Maka1',
         password: '323232',
       })
-      .expect(201)
       .expect((res) => {
+        expect(res.statusCode).toEqual(201);
         expect(res.body).toHaveProperty('access_token');
       });
   });
@@ -46,6 +46,31 @@ describe('AuthController (e2e)', () => {
       .send({
         username: 'Maka2',
         password: '323232',
+      })
+      .expect(400);
+  });
+
+  it('should signup new user and return token', () => {
+    return request(app.getHttpServer())
+      .post('/auth/signup')
+      .send({
+        username: 'Maka2',
+        password: '323232',
+        email: 'maka3@email.com',
+      })
+      .expect((res) => {
+        expect(res.statusCode).toEqual(201);
+        expect(res.body).toHaveProperty('access_token');
+      });
+  });
+
+  it('should return 400 if user already exists', () => {
+    return request(app.getHttpServer())
+      .post('/auth/signup')
+      .send({
+        username: 'Maka1',
+        password: '323232',
+        email: 'maka3@email.com',
       })
       .expect(400);
   });
