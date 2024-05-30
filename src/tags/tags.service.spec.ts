@@ -52,19 +52,6 @@ describe('TagsService', () => {
     expect(result).toEqual(expectedResult);
   });
 
-  it('should throw 400 if tag already exists', async () => {
-    // arrange
-    const expectedError = 'Tag with this name already exists';
-
-    //act
-    const result = service.createTag({} as CreateTagDto);
-
-    //assert
-    await expect(result).rejects.toThrow(
-      new BadRequestException(expectedError),
-    );
-  });
-
   it('should delete the tag', async () => {
     //arrange
     const tagToDelete = fakeTags[0];
@@ -76,7 +63,7 @@ describe('TagsService', () => {
     expect(result).toBeUndefined();
   });
 
-  it('should throw NotFoundException if tag does not exist', async () => {
+  it('should throw if tag was not deleted', async () => {
     //arrange
     const tagToDelete = fakeTags[0];
     //act

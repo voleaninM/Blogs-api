@@ -1,8 +1,4 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Tag } from './tag.entity';
 import { CreateTagDto } from './tag.dto';
 import { Repository, ILike } from 'typeorm';
@@ -16,14 +12,7 @@ export class TagsService {
   ) {}
 
   async createTag(tagDto: CreateTagDto): Promise<Tag> {
-    const { name } = tagDto;
-    const existingTag = await this.findTagByName(name);
-
-    if (existingTag) {
-      throw new BadRequestException('Tag with this name already exists');
-    }
     const tag = this.tagsRepository.create(tagDto);
-
     return await this.tagsRepository.save(tag);
   }
 
