@@ -4,12 +4,10 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateCommentDto, UpdateCommentDto } from './comment.dto';
 import { Comment } from './comment.entity';
-import { PostsService } from '../posts/posts.service';
 
 @Injectable()
 export class CommentsService {
   constructor(
-    private postsService: PostsService,
     @InjectRepository(Comment)
     private commentsRepository: Repository<Comment>,
   ) {}
@@ -18,29 +16,16 @@ export class CommentsService {
     return await this.commentsRepository.find();
   }
 
-  async getPostComments(postId: number): Promise<Comment[]> {
-    const post = await this.postsService.findPost(postId);
-    if (!post) {
-      throw new NotFoundException();
-    }
-    const comments = await this.commentsRepository.findBy({ postId: postId });
-    return comments;
-  }
-
   async createComment(
     createCommentDto: CreateCommentDto,
     postId: number,
     id: number,
   ): Promise<Comment> {
-    const post = await this.postsService.findPost(postId);
-    if (!post) {
-      throw new NotFoundException();
-    } else {
-      createCommentDto.userId = id;
-      createCommentDto.postId = postId;
-      const comment = this.commentsRepository.create(createCommentDto);
-      return await this.commentsRepository.save(comment);
-    }
+    createCommentDto.userId = id;
+    createCommentDto.postId = postId;
+    const comment = this.commentsRepository.create(createCommentDto);
+
+    return await this.commentsRepository.save(comment);
   }
 
   async findComment(id: number): Promise<Comment> {
@@ -56,9 +41,9 @@ export class CommentsService {
     id: number,
     updateCommentDto: UpdateCommentDto,
   ): Promise<Comment> {
-    const comment = await this.commentsRepository.findOneBy({ id: id });
-    const updatedComment = { ...comment, ...updateCommentDto };
-    return await this.commentsRepository.save(updatedComment);
+    await this.commentsRepository.update(id, updateCommentDto);
+    const updatedComment = this.findComment(id);
+    return updatedComment;
   }
 
   async deleteComment(id: number) {

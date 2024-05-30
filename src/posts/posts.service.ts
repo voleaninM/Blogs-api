@@ -90,4 +90,9 @@ export class PostsService {
       throw new NotFoundException();
     }
   }
+
+  async getComments(id: number) {
+    const post = await this.findPost(id);
+    return post.comments;
+  }
 }
