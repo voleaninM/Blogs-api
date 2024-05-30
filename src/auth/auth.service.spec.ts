@@ -6,6 +6,7 @@ import { User } from 'src/users/user.entity';
 import { LoginDto } from 'src/users/user.dto';
 import { BadRequestException } from '@nestjs/common';
 import { HashService } from 'src/hash/hash.service';
+import { getRepositoryToken } from '@nestjs/typeorm';
 
 describe('AuthService', () => {
   let authService: AuthService;
@@ -17,11 +18,12 @@ describe('AuthService', () => {
     { id: 1, username: 'max', password: 'hashedPass', email: 'email' },
   ];
 
-  const fakeUsersService = {
-    createUser: jest.fn(),
-    deleteUser: jest.fn(),
-    findByUsername: jest.fn(),
-    updateUser: jest.fn(),
+  const fakeUsersRepository = {
+    findBy: jest.fn(),
+    create: jest.fn(),
+    update: jest.fn(),
+    save: jest.fn(),
+    findOneBy: jest.fn(),
   };
   const fakeJwtService = {
     sign: jest.fn(),
@@ -35,9 +37,10 @@ describe('AuthService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AuthService,
+        UsersService,
         {
-          provide: UsersService,
-          useValue: fakeUsersService,
+          provide: getRepositoryToken(User),
+          useValue: fakeUsersRepository,
         },
         {
           provide: JwtService,
@@ -79,9 +82,9 @@ describe('AuthService', () => {
     expect(result).toEqual(expectedResult);
   });
 
-  it('should return 400 if no such user', async () => {
+  it('should throw if user does not exist', async () => {
     //arrange
-    const expectedResult = { message: 'Wrong data' };
+    const expectedResult = 'Wrong data';
 
     //act
     jest.spyOn(usersService, 'findByUsername').mockResolvedValueOnce(null);
@@ -122,7 +125,7 @@ describe('AuthService', () => {
     expect(result).toEqual(expectedResult);
   });
 
-  it('should throw 400 if username already exists', async () => {
+  it('should throw if username already exists', async () => {
     //arrange
     const expectedResult = 'User with this username already exists';
 

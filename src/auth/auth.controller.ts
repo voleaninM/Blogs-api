@@ -19,14 +19,14 @@ export class AuthController {
   @Public()
   @UseGuards(LocalAuthGuard)
   @Post('/login')
-  async login(@Request() req) {
+  login(@Request() req) {
     return this.authService.login(req.user);
   }
 
   @UseInterceptors(ClassSerializerInterceptor)
   @Public()
   @Post('/signup')
-  createUser(@Body() createUserDto: CreateUserDto) {
+  signUp(@Body() createUserDto: CreateUserDto) {
     return this.authService.signUp(createUserDto);
   }
 }

@@ -27,7 +27,7 @@ export class AuthService {
     }
   }
 
-  async login(user: User) {
+  login(user: User) {
     const payload = { username: user.username, sub: user.id };
     return {
       access_token: this.jwtService.sign(payload),
@@ -36,23 +36,19 @@ export class AuthService {
 
   async signUp(createUserDto: CreateUserDto) {
     const { password, username } = createUserDto;
+    const existingUser = await this.usersService.findByUsername(username);
+    if (existingUser) {
+      throw new BadRequestException('User with this username already exists');
+    }
+
     const hashedPassword = await this.hashService.hashPassword(password);
     const userDtoWithHashedPassword = {
       ...createUserDto,
       password: hashedPassword,
     };
-    const existingUser = await this.usersService.findByUsername(username);
-
-    if (existingUser) {
-      throw new BadRequestException('User with this username already exists');
-    }
     const createdUser = await this.usersService.createUser(
       userDtoWithHashedPassword,
     );
-    const payload = { username: createdUser.username, sub: createdUser.id };
-
-    return {
-      access_token: this.jwtService.sign(payload),
-    };
+    return this.login(createdUser);
   }
 }
