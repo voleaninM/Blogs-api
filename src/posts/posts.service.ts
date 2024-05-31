@@ -23,7 +23,7 @@ export class PostsService {
             name: In(query.tag),
           },
         },
-        relations: { comments: true, tags: true },
+        relations: { tags: true },
       });
     }
   }
@@ -32,21 +32,8 @@ export class PostsService {
     createPostDto: CreatePostDto,
     userId: number,
   ): Promise<Post> {
-    const tags = [];
-    if (createPostDto.tags) {
-      for (const tagName of createPostDto.tags) {
-        const existingTag = await this.tagService.findTagByName(tagName);
-
-        if (existingTag) {
-          tags.push(existingTag);
-        } else {
-          const newTag = await this.tagService.createTag({ name: tagName });
-          tags.push(newTag);
-        }
-      }
-    }
     createPostDto.userId = userId;
-    const post = this.postsRepository.create({ ...createPostDto, tags });
+    const post = this.postsRepository.create(createPostDto);
     return await this.postsRepository.save(post);
   }
 
@@ -63,25 +50,11 @@ export class PostsService {
 
   async updatePost(id: number, updatePostDto: UpdatePostDto): Promise<Post> {
     const post = await this.findPost(id);
-    const { tags, ...postData } = updatePostDto;
-    const useTags = [];
-
-    if (tags) {
-      for (const tagName of tags) {
-        const existingTag = await this.tagService.findTagByName(tagName);
-        if (existingTag) {
-          useTags.push(existingTag);
-        } else {
-          const newTag = this.tagService.createTag({ name: tagName });
-          useTags.push(newTag);
-        }
-      }
-    }
-
-    const updatedPost = { ...post, ...postData };
-    updatedPost.tags = useTags;
-
-    return await this.postsRepository.save(updatedPost);
+    const updatedPost = await this.postsRepository.save({
+      ...post,
+      ...updatePostDto,
+    });
+    return updatedPost;
   }
 
   async deletePost(id: number) {
