@@ -6,6 +6,7 @@ import { CreateCommentDto, UpdateCommentDto } from './comment.dto';
 import { Comment } from './comment.entity';
 import { CommentsService } from './comments.service';
 import { TagsService } from 'src/tags/tags.service';
+import { Tag } from 'src/tags/tag.entity';
 
 describe('CommentsService', () => {
   let commentsService: CommentsService;
@@ -15,9 +16,11 @@ describe('CommentsService', () => {
     { id: 1, content: 'comment', userId: 1, postId: 1, post: {} as Post },
   ];
 
-  const fakeTagsService = {
-    findTagByName: jest.fn(),
-    createTag: jest.fn(),
+  const fakeTagsRepository = {
+    create: jest.fn(),
+    save: jest.fn(),
+    delete: jest.fn(),
+    findOneBy: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -33,13 +36,14 @@ describe('CommentsService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         CommentsService,
+        TagsService,
         {
           provide: getRepositoryToken(Comment),
           useValue: commentsRepoStab,
         },
         {
-          provide: TagsService,
-          useValue: fakeTagsService,
+          provide: getRepositoryToken(Tag),
+          useValue: fakeTagsRepository,
         },
       ],
     }).compile();
