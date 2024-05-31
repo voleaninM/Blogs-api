@@ -28,4 +28,16 @@ export class TagsService {
       name: ILike(`%${tagName}%`),
     });
   }
+
+  async findOrCreateTags(tagNames: string[]): Promise<Tag[]> {
+    const tags = [];
+    for (const tagName of tagNames) {
+      let tag = await this.findTagByName(tagName);
+      if (!tag) {
+        tag = await this.createTag({ name: tagName });
+      }
+      tags.push(tag);
+    }
+    return tags;
+  }
 }
