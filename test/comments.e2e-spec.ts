@@ -19,21 +19,16 @@ describe('CommentsController (e2e)', () => {
     await app.init();
     databaseService = moduleFixture.get<DatabaseService>(DatabaseService);
 
-    const register = await request(app.getHttpServer())
-      .post('/users/register')
+    const signIn = await request(app.getHttpServer())
+      .post('/auth/signup')
       .send({
         username: 'Maka1',
         password: '323232',
         email: 'maka3@email.com',
       });
 
-    const login = await request(app.getHttpServer()).post('/auth/login').send({
-      username: 'Maka1',
-      password: '323232',
-    });
-    jwtToken = login.body.access_token;
-
-    const post = await request(app.getHttpServer())
+    jwtToken = signIn.body.access_token;
+    await request(app.getHttpServer())
       .post('/posts')
       .set('Authorization', 'Bearer ' + jwtToken)
       .send({
@@ -50,7 +45,7 @@ describe('CommentsController (e2e)', () => {
     return request(app.getHttpServer()).get('/posts/1/comments').expect(200);
   });
 
-  it('should return 404 if there is no post', () => {
+  it('should return 404 if can not create comment', () => {
     return request(app.getHttpServer()).get('/posts/99/comments').expect(404);
   });
 

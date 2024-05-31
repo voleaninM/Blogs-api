@@ -13,6 +13,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { TagSubscriber } from './subscribers/tag-subscriber';
+import { HashModule } from './hash/hash.module';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { TagSubscriber } from './subscribers/tag-subscriber';
     CommentsModule,
     UsersModule,
     TagsModule,
+    HashModule,
   ],
   controllers: [],
   providers: [

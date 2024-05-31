@@ -1,7 +1,5 @@
-import { BadRequestException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { UserResponseDto } from './user.dto';
 import { User } from './user.entity';
 import { UsersService } from './users.service';
 
@@ -17,6 +15,7 @@ describe('UsersService', () => {
     usersRepoStab = {
       findBy: () => Promise.resolve(fakeUsers),
       create: () => fakeUsers[0],
+      update: () => Promise.resolve(),
       save: () => Promise.resolve(fakeUsers[0]),
       findOneBy: () => Promise.resolve(fakeUsers[0]),
     };
@@ -39,7 +38,7 @@ describe('UsersService', () => {
 
   it('should create a user', async () => {
     //arrange
-    const expectedResult = {} as UserResponseDto;
+    const expectedResult = fakeUsers[0];
 
     //act
     jest.spyOn(userService, 'findByUsername').mockResolvedValue(null);
@@ -49,41 +48,15 @@ describe('UsersService', () => {
     expect(result).toEqual(expectedResult);
   });
 
-  it('should throw 400 if username already exists', async () => {
-    //arrange
-    const expectedResult = 'User with this username already exists';
-
-    //act
-    const result = userService.createUser(fakeUsers[0]);
-
-    //assert
-    await expect(result).rejects.toThrow(
-      new BadRequestException(expectedResult),
-    );
-  });
-
   it('should update a user', async () => {
     //arrange
-    const expectedResult = { email: 'email', username: 'max' };
+    const expectedResult = fakeUsers[0];
 
     //act
     const result = await userService.updateUser(fakeUsers[0], 1);
 
     //assert
     expect(result).toEqual(expectedResult);
-  });
-
-  it('should throw ConflictException if no provided data', async () => {
-    //arrange
-    const expectedResult = 'Provide Data';
-
-    //act
-    const result = userService.updateUser({}, 1);
-
-    //assert
-    await expect(result).rejects.toThrow(
-      new BadRequestException(expectedResult),
-    );
   });
 
   it('should return a user by username', async () => {

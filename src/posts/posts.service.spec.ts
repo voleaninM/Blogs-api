@@ -5,10 +5,10 @@ import { CreatePostDto, FilterOptionsDto, UpdatePostDto } from './post.dto';
 import { Post } from './post.entity';
 import { PostsService } from './posts.service';
 import { NotFoundException } from '@nestjs/common';
+import { Tag } from 'src/tags/tag.entity';
 
 describe('PostsService', () => {
   let postsService: PostsService;
-  let tagsService: TagsService;
   let postsRepoStab;
 
   const fakePosts: Post[] = [
@@ -21,10 +21,11 @@ describe('PostsService', () => {
       comments: [],
     },
   ];
-  const fakeTagsService = {
-    createTag: jest.fn(),
-    deleteTag: jest.fn(),
-    findTagByName: jest.fn(),
+  const fakeTagsRepository = {
+    create: jest.fn(),
+    delete: jest.fn(),
+    save: jest.fn(),
+    findOneBy: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -40,9 +41,10 @@ describe('PostsService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         PostsService,
+        TagsService,
         {
-          provide: TagsService,
-          useValue: fakeTagsService,
+          provide: getRepositoryToken(Tag),
+          useValue: fakeTagsRepository,
         },
         {
           provide: getRepositoryToken(Post),
@@ -52,7 +54,6 @@ describe('PostsService', () => {
     }).compile();
 
     postsService = module.get<PostsService>(PostsService);
-    tagsService = module.get<TagsService>(TagsService);
   });
 
   it('should be defined', () => {
@@ -92,7 +93,7 @@ describe('PostsService', () => {
     expect(result).toEqual(expectedResult);
   });
 
-  it('should throw 404 if no post found', async () => {
+  it('should throw if no post found', async () => {
     //arrange
 
     //act
@@ -123,7 +124,7 @@ describe('PostsService', () => {
     expect(result).toBeUndefined();
   });
 
-  it('should throw NotFoundException if post does not exist', async () => {
+  it('should throw if post does not exist', async () => {
     //arrange
     const commentToDelete = fakePosts[0];
 
@@ -135,5 +136,16 @@ describe('PostsService', () => {
 
     //assert
     await expect(result).rejects.toThrow(new NotFoundException());
+  });
+
+  it('should return comments for a post', async () => {
+    //arrange
+    const expectedResult = fakePosts[0].comments;
+
+    //act
+    const result = await postsService.getComments(fakePosts[0].id);
+
+    //assert
+    expect(result).toEqual(expectedResult);
   });
 });
