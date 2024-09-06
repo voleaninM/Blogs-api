@@ -4,7 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreatePostDto, FilterOptionsDto, UpdatePostDto } from './post.dto';
 import { In } from 'typeorm';
-import { TagsService } from 'src/tags/tags.service';
+import { TagsService } from '../tags/tags.service';
 
 @Injectable()
 export class PostsService {
@@ -15,8 +15,7 @@ export class PostsService {
   ) {}
 
   async getAll(query: FilterOptionsDto): Promise<Post[]> {
-    if (Object.values(query).length === 0)
-      return await this.postsRepository.find();
+    if (!Object.values(query).length) return await this.postsRepository.find();
     else {
       return await this.postsRepository.find({
         where: {
@@ -57,16 +56,13 @@ export class PostsService {
       relations: { comments: true, tags: true },
     });
     if (!post) {
-      throw new NotFoundException(`Post with ID ${id} not found`);
+      throw new NotFoundException();
     }
     return post;
   }
 
   async updatePost(id: number, updatePostDto: UpdatePostDto): Promise<Post> {
-    const post = await this.postsRepository.findOneBy({ id: id });
-    if (!post) {
-      throw new NotFoundException(`A Post with ID ${id} was not found`);
-    }
+    const post = await this.findPost(id);
     const { tags, ...postData } = updatePostDto;
     const useTags = [];
 
@@ -90,13 +86,8 @@ export class PostsService {
 
   async deletePost(id: number) {
     const result = await this.postsRepository.delete(id);
-    if (result.affected === 0) {
-      throw new NotFoundException(`A Post "${id}" was not found`);
+    if (!result.affected) {
+      throw new NotFoundException();
     }
-    return { message: 'Post successfully deleted' };
-  }
-
-  async findPostById(id: number): Promise<Post> {
-    return await this.postsRepository.findOneBy({ id: id });
   }
 }

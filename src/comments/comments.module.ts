@@ -6,8 +6,8 @@ import {
 } from './comments.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Comment } from './comment.entity';
-import { Post } from 'src/posts/post.entity';
-import { PostsModule } from 'src/posts/posts.module';
+import { Post } from '../posts/post.entity';
+import { PostsModule } from '../posts/posts.module';
 
 @Module({
   providers: [CommentsService],

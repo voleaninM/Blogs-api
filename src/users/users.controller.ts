@@ -2,7 +2,7 @@ import { Body, Controller, Patch, Post, Request } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { ApiTags } from '@nestjs/swagger';
 import { CreateUserDto, UpdateUserDto, UserResponseDto } from './user.dto';
-import { Public } from 'src/decorators/public.decorator';
+import { Public } from '../decorators/public.decorator';
 
 @ApiTags('users')
 @Controller('users')

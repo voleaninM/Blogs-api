@@ -1,7 +1,7 @@
-import { ConflictException } from '@nestjs/common';
+import { BadRequestException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { UpdateUserDto, UserResponseDto } from './user.dto';
+import { UserResponseDto } from './user.dto';
 import { User } from './user.entity';
 import { UsersService } from './users.service';
 
@@ -12,10 +12,6 @@ describe('UsersService', () => {
   const fakeUsers: User[] = [
     { id: 1, username: 'max', password: '323232', email: 'email' },
   ];
-
-  const bcryptLib = {
-    hash: jest.fn(),
-  };
 
   beforeEach(async () => {
     usersRepoStab = {
@@ -41,20 +37,19 @@ describe('UsersService', () => {
     expect(userService).toBeDefined();
   });
 
-  it('should create a comment', async () => {
+  it('should create a user', async () => {
     //arrange
     const expectedResult = {} as UserResponseDto;
 
     //act
     jest.spyOn(userService, 'findByUsername').mockResolvedValue(null);
-    jest.spyOn(bcryptLib, 'hash').mockResolvedValue('323232');
-    const result = await userService.createUser({ password: '32' } as User);
+    const result = await userService.createUser({ password: '323232' } as User);
 
     //assert
     expect(result).toEqual(expectedResult);
   });
 
-  it('should throw ConflictException if username already exists', async () => {
+  it('should throw 400 if username already exists', async () => {
     //arrange
     const expectedResult = 'User with this username already exists';
 
@@ -62,7 +57,9 @@ describe('UsersService', () => {
     const result = userService.createUser(fakeUsers[0]);
 
     //assert
-    await expect(result).rejects.toThrow(new ConflictException(expectedResult));
+    await expect(result).rejects.toThrow(
+      new BadRequestException(expectedResult),
+    );
   });
 
   it('should update a user', async () => {
@@ -84,7 +81,9 @@ describe('UsersService', () => {
     const result = userService.updateUser({}, 1);
 
     //assert
-    await expect(result).rejects.toThrow(new ConflictException(expectedResult));
+    await expect(result).rejects.toThrow(
+      new BadRequestException(expectedResult),
+    );
   });
 
   it('should return a user by username', async () => {

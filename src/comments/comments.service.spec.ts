@@ -21,7 +21,6 @@ describe('CommentsService', () => {
     findPost: jest.fn(),
     updatePost: jest.fn(),
     deletePost: jest.fn(),
-    findPostById: jest.fn(),
   };
   const deleteResponse = { message: 'Comment successfully deleted' };
 
@@ -32,7 +31,7 @@ describe('CommentsService', () => {
       create: () => fakeComments[0],
       save: () => Promise.resolve(fakeComments[0]),
       findOneBy: () => Promise.resolve(fakeComments[0]),
-      delete: () => Promise.resolve(deleteResponse),
+      delete: () => Promise.resolve({ affected: 1 }),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -79,18 +78,15 @@ describe('CommentsService', () => {
     expect(result).toEqual(expectedResult);
   });
 
-  it('should throw NotFoundException if post does not have comments', async () => {
+  it('should throw 404 if post does not have comments', async () => {
     //arrange
-    const expectedResult = 'Comments for Post 1 not found';
 
     //act
     jest.spyOn(commentsRepoStab, 'findBy').mockResolvedValueOnce([]);
     const result = commentsService.getPostComments(fakeComments[0].id);
 
     //assert
-    await expect(result).rejects.toThrow(
-      new NotFoundException('Comments for Post 1 not found'),
-    );
+    await expect(result).rejects.toThrow(new NotFoundException());
   });
 
   it('should create a comment', async () => {
@@ -98,7 +94,7 @@ describe('CommentsService', () => {
     const expectedResult = fakeComments[0];
 
     //act
-    jest.spyOn(postsService, 'findPostById').mockResolvedValue({} as Post);
+    jest.spyOn(postsService, 'findPost').mockResolvedValue({} as Post);
     const result = await commentsService.createComment(
       {} as CreateCommentDto,
       1,
@@ -109,18 +105,15 @@ describe('CommentsService', () => {
     expect(result).toEqual(expectedResult);
   });
 
-  it('should throw NotFoundException if post was not found', async () => {
+  it('should throw 404 if post was not found', async () => {
     //arrange
-    const expectedResult = 'Post 1 not found';
 
     //act
-    jest.spyOn(postsService, 'findPostById').mockResolvedValue(null);
+    jest.spyOn(postsService, 'findPost').mockResolvedValue(null);
     const result = commentsService.createComment({} as CreateCommentDto, 1, 1);
 
     //assert
-    await expect(result).rejects.toThrow(
-      new NotFoundException('Post 1 not found'),
-    );
+    await expect(result).rejects.toThrow(new NotFoundException());
   });
 
   it('should return a comment', async () => {
@@ -134,16 +127,15 @@ describe('CommentsService', () => {
     expect(result).toEqual(expectedResult);
   });
 
-  it('should throw NotFoundException if post was not found', async () => {
+  it('should throw 404 if post was not found', async () => {
     //arrange
-    const expectedResult = 'Comment with ID 1 not found';
 
     //act
     jest.spyOn(commentsRepoStab, 'findOneBy').mockResolvedValue(null);
     const result = commentsService.findComment(1);
 
     //assert
-    await expect(result).rejects.toThrow(new NotFoundException(expectedResult));
+    await expect(result).rejects.toThrow(new NotFoundException());
   });
 
   it('should update a comment', async () => {
@@ -160,22 +152,20 @@ describe('CommentsService', () => {
     expect(result).toEqual(expectedResult);
   });
 
-  it('should delete the tag', async () => {
+  it('should delete the comment', async () => {
     //arrange
     const commentToDelete = fakeComments[0];
-    const expectedResult = deleteResponse;
 
     //act
     const result = await commentsService.deleteComment(commentToDelete.id);
 
     //assert
-    expect(result).toEqual(expectedResult);
+    expect(result).toBeUndefined();
   });
 
-  it('should throw NotFoundException if tag does not exist', async () => {
+  it('should throw 404 if comment does not exist', async () => {
     //arrange
     const commentToDelete = fakeComments[0];
-    const expectedError = 'A Comment 1 was not found';
 
     //act
     commentsRepoStab.delete = () => {
@@ -184,6 +174,6 @@ describe('CommentsService', () => {
     const result = commentsService.deleteComment(commentToDelete.id);
 
     //assert
-    await expect(result).rejects.toThrow(new NotFoundException(expectedError));
+    await expect(result).rejects.toThrow(new NotFoundException());
   });
 });

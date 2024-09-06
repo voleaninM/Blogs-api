@@ -1,4 +1,8 @@
-import { ConflictException, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  NotFoundException,
+} from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { CreateTagDto } from './tag.dto';
@@ -10,13 +14,12 @@ describe('TagsService', () => {
   let tagsRepoStab;
 
   const fakeTags: Tag[] = [{ id: 1, name: 'tag' }];
-  const deleteResponse = { message: 'Tag successfully deleted' };
 
   beforeEach(async () => {
     tagsRepoStab = {
       create: () => fakeTags[0],
       save: () => Promise.resolve(fakeTags[0]),
-      delete: () => Promise.resolve(deleteResponse),
+      delete: () => Promise.resolve({ affected: 1 }),
       findOneBy: () => Promise.resolve(fakeTags[0]),
     };
 
@@ -49,7 +52,7 @@ describe('TagsService', () => {
     expect(result).toEqual(expectedResult);
   });
 
-  it('should throw ConflictException if tag already exists', async () => {
+  it('should throw 400 if tag already exists', async () => {
     // arrange
     const expectedError = 'Tag with this name already exists';
 
@@ -57,26 +60,25 @@ describe('TagsService', () => {
     const result = service.createTag({} as CreateTagDto);
 
     //assert
-    await expect(result).rejects.toThrow(new ConflictException(expectedError));
+    await expect(result).rejects.toThrow(
+      new BadRequestException(expectedError),
+    );
   });
 
   it('should delete the tag', async () => {
     //arrange
     const tagToDelete = fakeTags[0];
-    const expectedResult = deleteResponse;
 
     //act
     const result = await service.deleteTag(tagToDelete.id);
 
     //assert
-    expect(result).toEqual(expectedResult);
+    expect(result).toBeUndefined();
   });
 
   it('should throw NotFoundException if tag does not exist', async () => {
     //arrange
     const tagToDelete = fakeTags[0];
-    const expectedError = 'A Tag 1 was not found';
-
     //act
     tagsRepoStab.delete = () => {
       return { affected: 0 };
@@ -84,7 +86,7 @@ describe('TagsService', () => {
     const result = service.deleteTag(tagToDelete.id);
 
     //assert
-    await expect(result).rejects.toThrow(new NotFoundException(expectedError));
+    await expect(result).rejects.toThrow(new NotFoundException());
   });
 
   it('should find a tag based on name', async () => {

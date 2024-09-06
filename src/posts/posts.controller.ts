@@ -13,10 +13,10 @@ import {
 import { PostsService } from './posts.service';
 import { ApiTags } from '@nestjs/swagger';
 import { CreatePostDto, UpdatePostDto, FilterOptionsDto } from './post.dto';
-import { Public } from 'src/decorators/public.decorator';
+import { Public } from '../decorators/public.decorator';
 import { OwnerGuard } from '../guards/owner.guard';
 import { Post as PostEntity } from './post.entity';
-import { NormalizeQueryPipe } from 'src/pipes/query.pipe';
+import { NormalizeQueryPipe } from '../pipes/query.pipe';
 
 @ApiTags('posts')
 @Controller('posts')
