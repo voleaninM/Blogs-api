@@ -9,7 +9,7 @@ describe('PostsController (e2e)', () => {
   let jwtToken: string;
   let databaseService: DatabaseService;
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
       providers: [DatabaseService],
@@ -19,19 +19,15 @@ describe('PostsController (e2e)', () => {
     await app.init();
     databaseService = moduleFixture.get<DatabaseService>(DatabaseService);
 
-    const register = await request(app.getHttpServer())
-      .post('/users/register')
+    const signIn = await request(app.getHttpServer())
+      .post('/auth/signup')
       .send({
-        username: 'Maka1',
+        username: 'Maka',
         password: '323232',
         email: 'maka3@email.com',
       });
 
-    const login = await request(app.getHttpServer()).post('/auth/login').send({
-      username: 'Maka1',
-      password: '323232',
-    });
-    jwtToken = login.body.access_token;
+    jwtToken = signIn.body.access_token;
   });
 
   it('should return all posts', () => {

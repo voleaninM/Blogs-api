@@ -13,6 +13,9 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { TagSubscriber } from './subscribers/tag-subscriber';
+import { HashModule } from './hash/hash.module';
+import { HtmlModule } from './html/html.module';
+import { TemplateEntity } from './html/html.entity';
 
 @Module({
   imports: [
@@ -26,7 +29,7 @@ import { TagSubscriber } from './subscribers/tag-subscriber';
       useFactory: (configService: ConfigService) => ({
         type: 'sqlite',
         database: configService.get('DATABASE_NAME'),
-        entities: [Post, Comment, Tag, User],
+        entities: [Post, Comment, Tag, User, TemplateEntity],
         synchronize: true,
         subscribers: [TagSubscriber],
       }),
@@ -37,6 +40,8 @@ import { TagSubscriber } from './subscribers/tag-subscriber';
     CommentsModule,
     UsersModule,
     TagsModule,
+    HashModule,
+    HtmlModule,
   ],
   controllers: [],
   providers: [

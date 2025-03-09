@@ -20,18 +20,14 @@ describe('TagsController (e2e)', () => {
     databaseService = moduleFixture.get<DatabaseService>(DatabaseService);
 
     const register = await request(app.getHttpServer())
-      .post('/users/register')
+      .post('/auth/signup')
       .send({
         username: 'Maka1',
         password: '323232',
         email: 'maka3@email.com',
       });
 
-    const login = await request(app.getHttpServer()).post('/auth/login').send({
-      username: 'Maka1',
-      password: '323232',
-    });
-    jwtToken = login.body.access_token;
+    jwtToken = register.body.access_token;
   });
 
   it('should create a new tag', () => {

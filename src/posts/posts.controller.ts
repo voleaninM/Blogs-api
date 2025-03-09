@@ -9,6 +9,7 @@ import {
   Query,
   Request,
   UseGuards,
+  UsePipes,
 } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { ApiTags } from '@nestjs/swagger';
@@ -17,6 +18,7 @@ import { Public } from '../decorators/public.decorator';
 import { OwnerGuard } from '../guards/owner.guard';
 import { Post as PostEntity } from './post.entity';
 import { NormalizeQueryPipe } from '../pipes/query.pipe';
+import { TransformTagsPipe } from '../pipes/transform-tags.pipe';
 
 @ApiTags('posts')
 @Controller('posts')
@@ -32,7 +34,8 @@ export class PostsController {
   }
 
   @Post()
-  createPost(
+  @UsePipes(TransformTagsPipe)
+  async createPost(
     @Body() createPostDto: CreatePostDto,
     @Request() req,
   ): Promise<PostEntity> {
@@ -47,6 +50,7 @@ export class PostsController {
   }
 
   @UseGuards(OwnerGuard)
+  @UsePipes(TransformTagsPipe)
   @Patch(':id')
   updatePost(
     @Param('id') id: number,

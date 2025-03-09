@@ -1,19 +1,13 @@
-import { ValidationPipe } from '@nestjs/common';
-import { NestFactory } from '@nestjs/core';
-import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
+import { NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './app.module';
+import { setupSwagger } from './config/swagger.config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.useGlobalPipes(new ValidationPipe());
-  const config = new DocumentBuilder()
-    .setTitle('Posts example')
-    .setDescription('The posts API description')
-    .setVersion('1.0')
-    .addTag('posts')
-    .build();
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, document);
+  app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
+  setupSwagger(app);
 
   await app.listen(3000);
 }

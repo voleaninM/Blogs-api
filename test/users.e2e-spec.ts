@@ -18,29 +18,13 @@ describe('UsersController (e2e)', () => {
     app = moduleFixture.createNestApplication();
     await app.init();
     databaseService = moduleFixture.get<DatabaseService>(DatabaseService);
-  });
-
-  it('should create a new user', () => {
-    return request(app.getHttpServer())
-      .post('/users/register')
+    const register = await request(app.getHttpServer())
+      .post('/auth/signup')
       .send({
         username: 'Maka1',
         password: '323232',
-        email: 'maka@email.com',
-      })
-      .expect(201);
-  });
-
-  it('should not create a new user if existing', () => {
-    return request(app.getHttpServer())
-      .post('/users/register')
-      .set('Authorization', 'Bearer ' + jwtToken)
-      .send({
-        username: 'Maka1',
-        password: '323232',
-        email: 'maka@email.com',
-      })
-      .expect(400);
+        email: 'maka3@email.com',
+      });
   });
 
   it('should update a user', async () => {

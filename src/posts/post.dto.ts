@@ -1,5 +1,6 @@
 import { OmitType, PartialType } from '@nestjs/swagger';
 import { IsArray, IsNumber, IsOptional, IsString } from 'class-validator';
+import { Tag } from 'src/tags/tag.entity';
 
 export class CreatePostDto {
   @IsString()
@@ -10,7 +11,7 @@ export class CreatePostDto {
 
   @IsOptional()
   @IsArray()
-  tags: string[];
+  tags: Tag[];
 
   @IsOptional()
   @IsNumber()

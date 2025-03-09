@@ -15,11 +15,15 @@ import { CreateCommentDto, UpdateCommentDto } from './comment.dto';
 import { Public } from '../decorators/public.decorator';
 import { CommentOwnerGuard } from '../guards/comments-owner.guard';
 import { Comment } from './comment.entity';
+import { PostsService } from '../posts/posts.service';
 
 @ApiTags('comments')
 @Controller()
 export class CommentsController {
-  constructor(private readonly commentsService: CommentsService) {}
+  constructor(
+    private readonly commentsService: CommentsService,
+    private readonly postsService: PostsService,
+  ) {}
 
   @Public()
   @Get('/comments')
@@ -30,17 +34,20 @@ export class CommentsController {
   @Public()
   @Get('posts/:postId/comments')
   getPostComments(@Param('postId') postId: number): Promise<Comment[]> {
-    return this.commentsService.getPostComments(postId);
+    return this.postsService.getComments(postId);
   }
 
   @Post('posts/:postId/comments')
-  createComment(
+  async createComment(
     @Body() createCommentDto: CreateCommentDto,
     @Param('postId') postId: number,
     @Request() req,
   ): Promise<Comment> {
-    const { id } = req.user;
-    return this.commentsService.createComment(createCommentDto, postId, id);
+    const post = await this.postsService.findPost(postId);
+    if (post) {
+      const { id } = req.user;
+      return this.commentsService.createComment(createCommentDto, postId, id);
+    }
   }
 
   @Public()
